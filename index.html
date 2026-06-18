@@ -149,6 +149,12 @@ textarea:focus{outline:none;border-color:var(--primary);background:#fff;box-shad
 
 .note{font-size:12px;color:var(--ink-soft);text-align:center;margin-top:2px}
 
+/* code de synthèse (lisible par le tableau de bord PP) */
+.payload{margin-top:20px;border-top:1px dashed var(--line);padding-top:12px;
+  font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;line-height:1.45;color:#a7a2b8;word-break:break-all}
+.payload b{color:#7d7891;font-weight:700}
+#payloadCode{display:block;margin-top:6px;font-size:8.5px;color:#bdb9ca}
+
 /* student message */
 .msg{border-radius:14px;padding:18px 20px;margin:18px 0;font-size:15px;line-height:1.6}
 .msg.warm{background:linear-gradient(120deg,var(--acad-soft),var(--soc-soft));border:1px solid #e7e2f2}
@@ -282,6 +288,12 @@ textarea:focus{outline:none;border-color:var(--primary);background:#fff;box-shad
             Cet outil recueille un <b>ressenti déclaratif</b> à un instant donné : c'est une porte d'entrée pour le dialogue, jamais un diagnostic. Un ou plusieurs scores bas invitent à <b>ouvrir la conversation avec bienveillance</b>, sans dramatiser. En cas de signes de mal-être, ne reste pas seul·e : appuie-toi sur le CPE, l'infirmier·ère, le ou la psychologue de l'Éducation nationale et, si besoin, le médecin scolaire.
           </div>
         </div>
+      </div>
+
+      <div class="payload" id="payloadBlock">
+        <b>Code de synthèse — ne pas modifier.</b><br>
+        Ce code permet à ton professeur principal de regrouper les réponses de la classe. Il ne contient que tes réponses chiffrées.<br>
+        <span id="payloadCode"></span>
       </div>
 
       <div class="report-actions no-print">
@@ -546,6 +558,13 @@ function showReport(){
   buildStudentMessage();
   // synthèse PP
   buildPP(prior);
+
+  // code de synthèse exploitable par le tableau de bord PP (texte conservé dans le PDF)
+  const payload = {v:1, n:state.firstname, c:state.classe, m:state.moment, d:todayFr(),
+                   s:ITEMS.map(it=>state.scores[it.id]), cm:state.comment||''};
+  const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))))
+                .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  $('#payloadCode').textContent = 'BSLSTART'+b64+'BSLEND';
 
   // enregistrement automatique : un seul relevé par moment (on écrase si le moment existe déjà)
   const rec = {moment:state.moment, date:todayFr(), scores:{...state.scores}, comment:state.comment, classe:state.classe, firstname:state.firstname};
