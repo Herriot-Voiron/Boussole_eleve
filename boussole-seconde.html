@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ma Boussole — Seconde</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --acad:#6E5BA6;      --acad-soft:#efeaf6;
+  --soc:#34a98f;       --soc-soft:#e3f4ef;
+  --comp:#ed9f3c;      --comp-soft:#fdf0dc;
+  --ink:#2b2740;       --ink-soft:#6b6680;
+  --line:#e7e4ef;
+  --bg:#f7f6fb;        --card:#ffffff;
+  --primary:#6E5BA6;   --primary-dk:#56468a;
+  --alert:#d9534f;     --warn:#e0892f; --ok:#34a98f;
+  --r:18px;
+  --font-display:'Bricolage Grotesque', system-ui, sans-serif;
+  --font-body:'Inter', system-ui, -apple-system, sans-serif;
+  --ls:0; --ws:0; --lh:1.55;
+}
+body.dys{
+  --font-display:'Atkinson Hyperlegible', system-ui, sans-serif;
+  --font-body:'Atkinson Hyperlegible', system-ui, sans-serif;
+  --ls:.03em; --ws:.16em; --lh:1.8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--font-body);
+  color:var(--ink);
+  background:
+    radial-gradient(900px 500px at 12% -10%, rgba(110,91,166,.12), transparent 60%),
+    radial-gradient(800px 480px at 100% 0%, rgba(52,169,143,.10), transparent 55%),
+    radial-gradient(700px 600px at 50% 120%, rgba(237,159,60,.10), transparent 55%),
+    var(--bg);
+  letter-spacing:var(--ls); word-spacing:var(--ws); line-height:var(--lh);
+  min-height:100vh; padding:24px 16px 80px;
+  overflow-x:hidden; -webkit-text-size-adjust:100%;
+}
+.wrap{max-width:760px;margin:0 auto}
+@media(max-width:560px){ body{padding:16px 10px 64px} }
+
+/* top bar */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:800;font-size:18px;letter-spacing:-.01em}
+.brand .dots{display:inline-flex;gap:4px}
+.brand .dots i{width:11px;height:11px;border-radius:50%}
+.brand .dots i:nth-child(1){background:var(--acad)}
+.brand .dots i:nth-child(2){background:var(--soc)}
+.brand .dots i:nth-child(3){background:var(--comp)}
+.tools{display:flex;gap:8px}
+.toolbtn{font-family:var(--font-body);font-size:13px;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--ink-soft);
+  padding:8px 12px;border-radius:999px;cursor:pointer;transition:.15s}
+.toolbtn:hover{color:var(--ink);border-color:var(--primary)}
+.toolbtn[aria-pressed="true"]{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* card */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:0 18px 50px -28px rgba(43,39,64,.45);overflow:hidden}
+.pad{padding:32px}
+@media(max-width:560px){.pad{padding:18px}}
+
+/* accueil */
+.eyebrow{font-family:var(--font-body);font-weight:700;font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--primary)}
+h1{font-family:var(--font-display);font-weight:800;font-size:clamp(30px,6vw,44px);line-height:1.04;letter-spacing:-.02em;margin:10px 0 14px}
+h1 .em{background:linear-gradient(105deg,var(--acad),var(--soc) 55%,var(--comp));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{font-size:16px;color:var(--ink-soft);max-width:54ch}
+.lead strong{color:var(--ink)}
+.reassure{margin:22px 0;display:grid;gap:10px}
+.reassure .row{display:flex;gap:12px;align-items:flex-start;font-size:14.5px}
+.reassure .ic{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;color:#fff;font-weight:700;font-family:var(--font-display)}
+.reassure .row:nth-child(1) .ic{background:var(--acad)}
+.reassure .row:nth-child(2) .ic{background:var(--soc)}
+.reassure .row:nth-child(3) .ic{background:var(--comp)}
+
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:24px 0 8px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field.full{grid-column:1/-1}
+label{font-size:13px;font-weight:600;color:var(--ink-soft)}
+input,select{font-family:var(--font-body);font-size:15px;color:var(--ink);background:#fbfaff;
+  border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;width:100%;transition:.15s;letter-spacing:var(--ls)}
+input:focus,select:focus{outline:none;border-color:var(--primary);background:#fff;box-shadow:0 0 0 4px rgba(110,91,166,.12)}
+@media(max-width:560px){.fields{grid-template-columns:1fr}}
+
+/* boutons */
+.btn{font-family:var(--font-display);font-weight:700;font-size:16px;border:none;border-radius:14px;
+  padding:14px 22px;cursor:pointer;transition:.18s;display:inline-flex;align-items:center;gap:9px;letter-spacing:-.01em}
+.btn.primary{background:var(--primary);color:#fff;box-shadow:0 12px 26px -12px rgba(110,91,166,.8)}
+.btn.primary:hover{background:var(--primary-dk);transform:translateY(-1px)}
+.btn.primary:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.btn.ghost{background:#f4f2fa;color:var(--primary)}
+.btn.ghost:hover{background:#ece8f6}
+.btn.line{background:#fff;color:var(--ink-soft);border:1.5px solid var(--line)}
+.btn.line:hover{color:var(--ink);border-color:var(--primary)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+
+/* progress */
+.progress{padding:18px 32px 0}
+@media(max-width:560px){.progress{padding:16px 18px 0}}
+.pbar{height:8px;border-radius:999px;background:var(--line);overflow:hidden}
+.pfill{height:100%;width:0;border-radius:999px;transition:width .35s ease;background:linear-gradient(90deg,var(--acad),var(--soc),var(--comp))}
+.pmeta{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:13px}
+.sphere-tag{display:inline-flex;align-items:center;gap:7px;font-weight:700;font-family:var(--font-display)}
+.sphere-tag .swatch{width:13px;height:13px;border-radius:4px}
+.qcount{color:var(--ink-soft);font-weight:600}
+
+/* question */
+.qstep{padding:26px 32px 32px}
+@media(max-width:560px){.qstep{padding:18px}}
+.qnum{font-family:var(--font-display);font-weight:800;font-size:13px;color:var(--ink-soft);letter-spacing:.06em}
+.qtext{font-family:var(--font-display);font-weight:700;font-size:clamp(21px,4.4vw,28px);line-height:1.18;letter-spacing:-.015em;margin:8px 0 26px}
+.scale{display:grid;grid-template-columns:repeat(10,1fr);gap:8px}
+@media(max-width:560px){.scale{grid-template-columns:repeat(5,1fr)}}
+.dot{aspect-ratio:1/1;border:1.5px solid var(--line);background:#fbfaff;border-radius:13px;
+  font-family:var(--font-display);font-weight:700;font-size:17px;color:var(--ink-soft);cursor:pointer;transition:.13s;display:grid;place-items:center}
+.dot:hover{border-color:var(--primary);color:var(--primary);transform:translateY(-2px)}
+.dot.sel{background:var(--primary);border-color:var(--primary);color:#fff;transform:translateY(-2px);box-shadow:0 10px 20px -10px rgba(110,91,166,.9)}
+.scale-ends{display:flex;justify-content:space-between;margin-top:12px;font-size:13px;color:var(--ink-soft);font-weight:600}
+.qnav{display:flex;justify-content:space-between;align-items:center;margin-top:26px}
+.linklike{background:none;border:none;color:var(--ink-soft);font-family:var(--font-body);font-weight:600;font-size:14px;cursor:pointer;padding:8px 4px}
+.linklike:hover{color:var(--ink)}
+.linklike:disabled{opacity:.3;cursor:not-allowed}
+
+textarea{font-family:var(--font-body);font-size:15px;color:var(--ink);background:#fbfaff;border:1.5px solid var(--line);
+  border-radius:12px;padding:13px 14px;width:100%;min-height:110px;resize:vertical;letter-spacing:var(--ls);line-height:var(--lh)}
+textarea:focus{outline:none;border-color:var(--primary);background:#fff;box-shadow:0 0 0 4px rgba(110,91,166,.12)}
+
+/* report */
+.report-head{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px;margin-bottom:6px}
+.report-head h2{font-family:var(--font-display);font-weight:800;font-size:clamp(24px,5vw,34px);letter-spacing:-.02em;line-height:1.05}
+.report-meta{font-size:13.5px;color:var(--ink-soft);font-weight:600;text-align:right}
+.report-meta b{color:var(--ink)}
+
+.chartwrap{display:grid;place-items:center;margin:8px 0 4px}
+.chartwrap svg{width:100%;height:auto;max-width:600px}
+@media(max-width:560px){
+  .chartwrap{margin-inline:-8px}            /* déborde légèrement du padding pour agrandir le radar */
+  .chartwrap svg{max-width:none}
+}
+
+.legend{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin:4px 0 18px;font-size:13px;font-weight:600}
+.legend .it{display:inline-flex;align-items:center;gap:7px;color:var(--ink-soft)}
+.legend .sw{width:14px;height:14px;border-radius:4px;display:inline-block}
+.legend .ln{width:22px;height:0;border-top-width:3px;border-top-style:solid;display:inline-block}
+
+.note{font-size:12px;color:var(--ink-soft);text-align:center;margin-top:2px}
+
+/* student message */
+.msg{border-radius:14px;padding:18px 20px;margin:18px 0;font-size:15px;line-height:1.6}
+.msg.warm{background:linear-gradient(120deg,var(--acad-soft),var(--soc-soft));border:1px solid #e7e2f2}
+.msg b{font-weight:700}
+
+/* PP panel */
+.pp{border:1.5px solid var(--line);border-radius:16px;overflow:hidden;margin-top:22px}
+.pp-head{background:#2b2740;color:#fff;padding:14px 20px;font-family:var(--font-display);font-weight:700;font-size:15px;display:flex;align-items:center;gap:9px}
+.pp-head .tag{font-size:11px;font-weight:700;background:rgba(255,255,255,.16);padding:3px 9px;border-radius:999px;letter-spacing:.06em;text-transform:uppercase}
+.pp-body{padding:20px}
+.sphere-bars{display:grid;gap:13px;margin-bottom:8px}
+.sb{display:grid;grid-template-columns:130px 1fr 42px;align-items:center;gap:12px;font-size:13.5px}
+@media(max-width:560px){.sb{grid-template-columns:96px 1fr 38px}}
+.sb .nm{font-weight:700;font-family:var(--font-display);display:flex;align-items:center;gap:7px}
+.sb .nm i{width:11px;height:11px;border-radius:3px;flex:none}
+.sb .track{height:11px;background:var(--line);border-radius:999px;overflow:hidden}
+.sb .fill{height:100%;border-radius:999px}
+.sb .val{font-weight:700;text-align:right;font-family:var(--font-display)}
+
+.flags{margin-top:18px;display:grid;gap:9px}
+.flag{display:flex;align-items:flex-start;gap:11px;padding:12px 14px;border-radius:12px;font-size:14px;line-height:1.45}
+.flag .b{flex:none;width:9px;height:9px;border-radius:50%;margin-top:6px}
+.flag.lv-alert{background:#fdeceb;border:1px solid #f5cfcd}
+.flag.lv-alert .b{background:var(--alert)}
+.flag.lv-warn{background:#fdf3e6;border:1px solid #f6e0c1}
+.flag.lv-warn .b{background:var(--warn)}
+.flag.lv-info{background:#eef4ff;border:1px solid #d8e4fb}
+.flag.lv-info .b{background:#3b6fd4}
+.flag.lv-ok{background:#e9f6f1;border:1px solid #c9ebe0}
+.flag.lv-ok .b{background:var(--ok)}
+.flag b{font-weight:700}
+
+.subh{font-family:var(--font-display);font-weight:700;font-size:14px;margin:20px 0 8px;color:var(--ink)}
+.commentbox{background:#fbfaff;border:1px solid var(--line);border-radius:12px;padding:13px 15px;font-size:14px;font-style:italic;color:var(--ink)}
+.disclaimer{margin-top:18px;font-size:12.5px;color:var(--ink-soft);line-height:1.5;border-top:1px dashed var(--line);padding-top:14px}
+
+.report-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+.report-actions .row2{display:flex;gap:14px;flex-wrap:wrap;width:100%;margin-top:4px}
+
+.hidden{display:none!important}
+
+/* print */
+@media print{
+  @page{size:A4;margin:14mm}
+  body{background:#fff;padding:0}
+  .no-print,.topbar,.report-actions{display:none!important}
+  .card{box-shadow:none;border:none}
+  .pad{padding:0}
+  .pp,.card,.msg,.flag{break-inside:avoid}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .chartwrap svg{max-width:440px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar no-print">
+    <div class="brand"><span class="dots"><i></i><i></i><i></i></span> Ma Boussole</div>
+    <div class="tools">
+      <button class="toolbtn" id="dysBtn" aria-pressed="false" title="Police et espacement facilités">Lecture facilitée</button>
+    </div>
+  </div>
+
+  <!-- ÉCRAN 1 : ACCUEIL -->
+  <section class="card" id="screen-welcome">
+    <div class="pad">
+      <span class="eyebrow">Lycée Édouard Herriot · Seconde</span>
+      <h1>Comment tu te sens, <span class="em">vraiment</span> ?</h1>
+      <p class="lead">Ce petit questionnaire t'invite à faire le point sur ton année. <strong>Il n'y a pas de bonne ou de mauvaise réponse</strong> : ce qui compte, c'est ton ressenti à toi, aujourd'hui.</p>
+
+      <div class="reassure">
+        <div class="row"><span class="ic">1</span><div><b>15 phrases, 2 minutes.</b> Tu réponds avec un curseur de 1 (pas du tout) à 10 (tout à fait).</div></div>
+        <div class="row"><span class="ic">2</span><div><b>C'est pour t'aider.</b> Tes réponses servent à ton professeur principal pour mieux t'accompagner — pas à te noter.</div></div>
+        <div class="row"><span class="ic">3</span><div><b>Tu pourras le refaire</b> à différents moments de l'année pour voir comment les choses évoluent.</div></div>
+      </div>
+
+      <div class="fields">
+        <div class="field"><label for="firstname">Ton prénom</label><input id="firstname" type="text" placeholder="Ex. Inès" autocomplete="off"></div>
+        <div class="field"><label for="classe">Ta classe</label><input id="classe" type="text" placeholder="Ex. 2nde 4" autocomplete="off"></div>
+        <div class="field full"><label for="moment">Quel moment de l'année ?</label>
+          <select id="moment">
+            <option value="Début d'année">Début d'année (septembre–octobre)</option>
+            <option value="Milieu d'année">Milieu d'année (janvier–février)</option>
+            <option value="Fin d'année">Fin d'année (mai–juin)</option>
+            <option value="Autre moment">Autre moment</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" id="startBtn" disabled>Commencer →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ÉCRAN 2 : QUESTIONNAIRE -->
+  <section class="card hidden" id="screen-quiz">
+    <div class="progress">
+      <div class="pbar"><div class="pfill" id="pfill"></div></div>
+      <div class="pmeta">
+        <span class="sphere-tag" id="sphereTag"><span class="swatch"></span><span class="lbl"></span></span>
+        <span class="qcount" id="qcount"></span>
+      </div>
+    </div>
+    <div class="qstep" id="qstep"><!-- injecté --></div>
+  </section>
+
+  <!-- ÉCRAN 3 : RAPPORT -->
+  <section class="card hidden" id="screen-report">
+    <div class="pad" id="report">
+      <div class="report-head">
+        <div>
+          <span class="eyebrow">Ma boussole</span>
+          <h2 id="rTitle">Le bilan de ton année</h2>
+        </div>
+        <div class="report-meta" id="rMeta"></div>
+      </div>
+
+      <div class="chartwrap" id="chartwrap"></div>
+      <div class="legend" id="legend"></div>
+
+      <div class="msg warm" id="studentMsg"></div>
+
+      <div class="pp">
+        <div class="pp-head"><span class="tag">Synthèse</span> Pour le professeur principal</div>
+        <div class="pp-body">
+          <div class="sphere-bars" id="sphereBars"></div>
+          <div id="ppContent"></div>
+          <div class="disclaimer">
+            Cet outil recueille un <b>ressenti déclaratif</b> à un instant donné : c'est une porte d'entrée pour le dialogue, jamais un diagnostic. Un ou plusieurs scores bas invitent à <b>ouvrir la conversation avec bienveillance</b>, sans dramatiser. En cas de signes de mal-être, ne reste pas seul·e : appuie-toi sur le CPE, l'infirmier·ère, le ou la psychologue de l'Éducation nationale et, si besoin, le médecin scolaire.
+          </div>
+        </div>
+      </div>
+
+      <div class="report-actions no-print">
+        <button class="btn primary" id="pdfBtn">Exporter en PDF</button>
+        <button class="btn line" id="restartBtn">Recommencer</button>
+      </div>
+    </div>
+  </section>
+
+  <p class="note no-print" style="margin-top:18px">Outil de positionnement · Conçu pour les PP de Seconde · Enregistrement automatique sur cet appareil · Le PDF est à déposer dans le casier de l'enseignant</p>
+</div>
+
+<script>
+/* ====================== DONNÉES ====================== */
+// Ordre de TRACÉ autour du cercle (sens horaire depuis le haut), pour coller à la grille d'origine.
+const ITEMS = [
+  {id:0,  sphere:'acad', short:'Motivation',            q:"J'ai envie de venir en cours et d'apprendre de nouvelles choses."},
+  {id:1,  sphere:'acad', short:'Acquis',                q:"Je comprends ce qu'on étudie et j'ai l'impression de progresser."},
+  {id:2,  sphere:'acad', short:'Résolution\nde problème',q:"Quand un exercice est difficile, j'arrive à chercher des solutions par moi-même."},
+  {id:3,  sphere:'comp', short:'Calme\nen classe',      q:"En classe, je me sens calme et posé·e, sans avoir besoin de bouger ou de m'agiter."},
+  {id:4,  sphere:'comp', short:'Participation\norale',  q:"Je participe à l'oral et je prends la parole en classe."},
+  {id:5,  sphere:'comp', short:'Sérénité\nrelationnelle',q:"Quand je suis énervé·e ou en désaccord, j'arrive à réagir sans agressivité."},
+  {id:6,  sphere:'comp', short:'Respect des\nrègles',   q:"Je respecte les règles de la classe et du lycée."},
+  {id:7,  sphere:'soc',  short:"Recherche\nd'aide",     q:"Quand je ne comprends pas ou que ça ne va pas, j'ose demander de l'aide."},
+  {id:8,  sphere:'soc',  short:'Relation à\nl\u2019enseignant',q:"Je me sens en confiance avec mes professeurs."},
+  {id:9,  sphere:'soc',  short:'Relation\naux pairs',   q:"Je m'entends bien avec les autres élèves et j'ai des camarades sur qui compter."},
+  {id:10, sphere:'soc',  short:'Acceptation\npar les pairs',q:"Je me sens accepté·e et à ma place dans ma classe."},
+  {id:11, sphere:'acad', short:'Attention',             q:"J'arrive à rester concentré·e pendant les cours."},
+  {id:12, sphere:'acad', short:'Autonomie',             q:"Je sais m'organiser dans mon travail (devoirs, révisions) sans qu'on me le rappelle."},
+  {id:13, sphere:'acad', short:'Initiative',            q:"Je n'hésite pas à me lancer, à proposer des idées ou à essayer."},
+  {id:14, sphere:'acad', short:'Persévérance',          q:"Quand quelque chose est difficile, je continue d'essayer sans abandonner."},
+];
+
+const SPHERES = {
+  acad:{name:'Sphère académique', color:'#6E5BA6'},
+  soc :{name:'Sphère sociale',    color:'#34a98f'},
+  comp:{name:'Sphère comportementale', color:'#ed9f3c'},
+};
+
+// Ordre de PRÉSENTATION des questions (regroupé par sphère, progression douce)
+const QUESTION_ORDER = [0,1,11,12,13,14,2, 8,9,10,7, 4,6,3,5];
+
+/* ====================== ÉTAT ====================== */
+const state = { firstname:'', classe:'', moment:'', scores:{}, comment:'', step:0 };
+
+/* ====================== HELPERS ====================== */
+const $ = s => document.querySelector(s);
+const itemById = id => ITEMS.find(i=>i.id===id);
+function avgSphere(sphere, scores){
+  const ids = ITEMS.filter(i=>i.sphere===sphere).map(i=>i.id);
+  const vals = ids.map(id=>scores[id]).filter(v=>typeof v==='number');
+  if(!vals.length) return null;
+  return vals.reduce((a,b)=>a+b,0)/vals.length;
+}
+function todayFr(){ return new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}); }
+function storeKey(){ return 'boussole2nde::'+(state.firstname.trim().toLowerCase())+'::'+(state.classe.trim().toLowerCase()); }
+function loadHistory(){ try{ return JSON.parse(localStorage.getItem(storeKey())||'[]'); }catch(e){ return []; } }
+function saveHistory(arr){ try{ localStorage.setItem(storeKey(), JSON.stringify(arr)); }catch(e){} }
+
+/* ====================== ACCUEIL ====================== */
+const fn=$('#firstname'), cl=$('#classe'), mo=$('#moment'), startBtn=$('#startBtn');
+function checkStart(){ startBtn.disabled = !(fn.value.trim() && cl.value.trim()); }
+fn.addEventListener('input',checkStart); cl.addEventListener('input',checkStart);
+startBtn.addEventListener('click',()=>{
+  state.firstname=fn.value.trim(); state.classe=cl.value.trim(); state.moment=mo.value;
+  state.scores={}; state.comment=''; state.step=0;
+  $('#screen-welcome').classList.add('hidden');
+  $('#screen-quiz').classList.remove('hidden');
+  renderStep();
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+$('#dysBtn').addEventListener('click',e=>{
+  const on=document.body.classList.toggle('dys');
+  e.currentTarget.setAttribute('aria-pressed', on?'true':'false');
+});
+
+/* ====================== QUESTIONNAIRE ====================== */
+const TOTAL = QUESTION_ORDER.length;
+function renderStep(){
+  const qstep=$('#qstep');
+  // étape commentaire = TOTAL
+  if(state.step >= TOTAL){ renderComment(); return; }
+
+  const id = QUESTION_ORDER[state.step];
+  const item = itemById(id);
+  const sph = SPHERES[item.sphere];
+
+  // progress
+  $('#pfill').style.width = ((state.step)/TOTAL*100)+'%';
+  $('#sphereTag .swatch').style.background = sph.color;
+  $('#sphereTag .lbl').textContent = sph.name;
+  $('#qcount').textContent = `Question ${state.step+1} / ${TOTAL}`;
+
+  const current = state.scores[id];
+  let dots='';
+  for(let v=1;v<=10;v++){
+    dots+=`<button class="dot${current===v?' sel':''}" data-v="${v}">${v}</button>`;
+  }
+  qstep.innerHTML = `
+    <div class="qnum">${sph.name.toUpperCase()}</div>
+    <div class="qtext">${item.q.replace('\n',' ')}</div>
+    <div class="scale">${dots}</div>
+    <div class="scale-ends"><span>1 · Pas du tout</span><span>Tout à fait · 10</span></div>
+    <div class="qnav">
+      <button class="linklike" id="prevBtn"${state.step===0?' disabled':''}>← Précédent</button>
+      <button class="linklike" id="skipBtn">${current?'Suivant →':''}</button>
+    </div>`;
+
+  qstep.querySelectorAll('.dot').forEach(d=>{
+    d.addEventListener('click',()=>{
+      state.scores[id]=parseInt(d.dataset.v,10);
+      qstep.querySelectorAll('.dot').forEach(x=>x.classList.remove('sel'));
+      d.classList.add('sel');
+      setTimeout(()=>{ state.step++; renderStep(); window.scrollTo({top:0,behavior:'smooth'}); }, 260);
+    });
+  });
+  $('#prevBtn').addEventListener('click',()=>{ if(state.step>0){state.step--; renderStep(); window.scrollTo({top:0,behavior:'smooth'});} });
+  const skip=$('#skipBtn'); if(skip) skip.addEventListener('click',()=>{ if(state.scores[id]){ state.step++; renderStep(); window.scrollTo({top:0,behavior:'smooth'});} });
+}
+
+function renderComment(){
+  $('#pfill').style.width='100%';
+  $('#sphereTag .swatch').style.background='var(--primary)';
+  $('#sphereTag .lbl').textContent='Dernière étape';
+  $('#qcount').textContent='Presque fini !';
+  $('#qstep').innerHTML = `
+    <div class="qnum">FACULTATIF</div>
+    <div class="qtext">Tu veux ajouter quelque chose ?</div>
+    <p class="lead" style="margin-bottom:16px">Un mot sur ton moral, une difficulté, une bonne nouvelle… Écris-le si tu en as envie. Sinon, passe directement à ton bilan.</p>
+    <textarea id="commentArea" placeholder="Ce que tu veux dire (facultatif)…">${state.comment||''}</textarea>
+    <div class="qnav">
+      <button class="linklike" id="prevBtn">← Précédent</button>
+      <button class="btn primary" id="finishBtn">Voir mon bilan →</button>
+    </div>`;
+  $('#prevBtn').addEventListener('click',()=>{ state.step--; renderStep(); window.scrollTo({top:0,behavior:'smooth'}); });
+  $('#finishBtn').addEventListener('click',()=>{
+    state.comment=$('#commentArea').value.trim();
+    showReport();
+  });
+}
+
+/* ====================== RADAR SVG ====================== */
+function polar(cx,cy,r,angDeg){ const a=(angDeg-90)*Math.PI/180; return [cx+r*Math.cos(a), cy+r*Math.sin(a)]; }
+function wrapLabel(txt){ return txt.split('\n'); }
+
+function buildRadar(series){
+  // series : tableau d'objets {label, color, dash, scores}
+  const W=660,H=660,cx=330,cy=330,R=200,maxR=10,labelR=R+24;
+  const N=ITEMS.length, stepA=360/N;
+  let svg=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagramme radar des ressentis">`;
+
+  // 1. wedges de fond par sphère (un secteur de 24° par axe)
+  ITEMS.forEach((it,i)=>{
+    const a0=i*stepA-stepA/2, a1=i*stepA+stepA/2;
+    const [x0,y0]=polar(cx,cy,R,a0), [x1,y1]=polar(cx,cy,R,a1);
+    svg+=`<path d="M${cx} ${cy} L${x0.toFixed(1)} ${y0.toFixed(1)} A${R} ${R} 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)} Z" fill="${SPHERES[it.sphere].color}" fill-opacity="0.13"/>`;
+  });
+  // bande extérieure saturée (identité visuelle)
+  ITEMS.forEach((it,i)=>{
+    const a0=i*stepA-stepA/2, a1=i*stepA+stepA/2;
+    const rIn=R-9;
+    const [x0,y0]=polar(cx,cy,R,a0),[x1,y1]=polar(cx,cy,R,a1);
+    const [xi0,yi0]=polar(cx,cy,rIn,a1),[xi1,yi1]=polar(cx,cy,rIn,a0);
+    svg+=`<path d="M${x0.toFixed(1)} ${y0.toFixed(1)} A${R} ${R} 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)} L${xi0.toFixed(1)} ${yi0.toFixed(1)} A${rIn} ${rIn} 0 0 0 ${xi1.toFixed(1)} ${yi1.toFixed(1)} Z" fill="${SPHERES[it.sphere].color}" fill-opacity="0.85"/>`;
+  });
+
+  // 2. anneaux de grille (2,4,6,8,10)
+  for(let g=2; g<=maxR; g+=2){
+    const rr=R*g/maxR;
+    svg+=`<circle cx="${cx}" cy="${cy}" r="${rr.toFixed(1)}" fill="none" stroke="#ffffff" stroke-width="1.4"/>`;
+  }
+  svg+=`<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#ffffff" stroke-width="2"/>`;
+
+  // 3. axes
+  ITEMS.forEach((it,i)=>{
+    const [x,y]=polar(cx,cy,R,i*stepA);
+    svg+=`<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#ffffff" stroke-width="1.4"/>`;
+  });
+
+  // 4. polygones de données (du plus ancien au plus récent)
+  series.forEach(s=>{
+    let pts=ITEMS.map((it,i)=>{ const v=Math.max(0,Math.min(10,s.scores[it.id]||0)); const r=R*v/maxR; return polar(cx,cy,r,i*stepA).map(n=>n.toFixed(1)).join(','); }).join(' ');
+    const dash = s.dash? ` stroke-dasharray="${s.dash}"`:'';
+    svg+=`<polygon points="${pts}" fill="${s.color}" fill-opacity="${s.fillOp}" stroke="${s.color}" stroke-width="${s.w}"${dash} stroke-linejoin="round"/>`;
+  });
+  // points (sur la dernière série = la plus récente)
+  const last=series[series.length-1];
+  const single = series.length===1;
+  ITEMS.forEach((it,i)=>{
+    const v=Math.max(0,Math.min(10,last.scores[it.id]||0)); const r=R*v/maxR;
+    const [x,y]=polar(cx,cy,r,i*stepA);
+    const fill = single ? SPHERES[it.sphere].color : last.color;
+    svg+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${single?4.2:4.6}" fill="${fill}" stroke="#fff" stroke-width="1.7"/>`;
+  });
+
+  // 5. étiquettes
+  ITEMS.forEach((it,i)=>{
+    const ang=i*stepA; const [lx,ly]=polar(cx,cy,labelR,ang);
+    const a=(ang-90)*Math.PI/180; const cos=Math.cos(a);
+    let anchor = cos>0.15?'start':(cos<-0.15?'end':'middle');
+    const lines=wrapLabel(it.short);
+    const lh=15; const startY=ly-(lines.length-1)*lh/2;
+    lines.forEach((ln,k)=>{
+      svg+=`<text x="${lx.toFixed(1)}" y="${(startY+k*lh).toFixed(1)}" text-anchor="${anchor}" dominant-baseline="middle" font-family="Inter,sans-serif" font-size="13" font-weight="600" fill="#3a3550">${ln}</text>`;
+    });
+  });
+
+  // valeurs de l'échelle
+  for(let g=2; g<=maxR; g+=2){ const rr=R*g/maxR; svg+=`<text x="${cx+4}" y="${(cy-rr+4).toFixed(1)}" font-family="Inter,sans-serif" font-size="11" fill="#9a96ad" font-weight="600">${g}</text>`; }
+
+  svg+=`</svg>`;
+  return svg;
+}
+
+/* ====================== RAPPORT ====================== */
+function showReport(){
+  $('#screen-quiz').classList.add('hidden');
+  $('#screen-report').classList.remove('hidden');
+
+  const history = loadHistory();
+  const series=[];
+  // anciens relevés (jusqu'à 2) pour la comparaison sur l'année
+  const prior = history.filter(r=>r.moment!==state.moment).slice(-2);
+  prior.forEach(rec=>{
+    series.push({label:rec.moment+' · '+rec.date, scores:rec.scores});
+  });
+  const currentSeries={label:state.moment+' · aujourd\'hui', scores:state.scores, current:true};
+  series.push(currentSeries);
+
+  // styles distincts du plus ancien au plus récent ; le plus récent est mis en valeur
+  const TLPAL=[
+    {color:'#c2255c', dash:'8 5', w:2,   fillOp:0.03}, // plus ancien — rose, pointillés longs
+    {color:'#1c7ed6', dash:'2 6', w:2,   fillOp:0.03}, // intermédiaire — bleu, pointillés courts
+    {color:'#2b2740', dash:'',    w:3.2, fillOp:(series.length>1?0.09:0.18)}, // le plus récent — encre, plein
+  ];
+  const n=series.length;
+  series.forEach((s,i)=>{ Object.assign(s, TLPAL[TLPAL.length-n+i]); });
+
+  $('#chartwrap').innerHTML = buildRadar(series);
+
+  // légende
+  let leg='';
+  if(series.length>1){
+    series.forEach(s=>{
+      const style = s.dash? 'border-top-style:dashed':'border-top-style:solid';
+      const strong = s.current? 'color:var(--ink);font-weight:700':'';
+      leg+=`<span class="it" style="${strong}"><span class="ln" style="border-top-color:${s.color};border-top-width:${s.current?'4px':'3px'};${style}"></span>${s.label}</span>`;
+    });
+  }else{
+    leg=`<span class="it"><span class="sw" style="background:${SPHERES.acad.color}"></span>Académique</span>
+         <span class="it"><span class="sw" style="background:${SPHERES.soc.color}"></span>Sociale</span>
+         <span class="it"><span class="sw" style="background:${SPHERES.comp.color}"></span>Comportementale</span>`;
+  }
+  $('#legend').innerHTML=leg;
+
+  // entête
+  $('#rTitle').textContent = `${state.firstname}, voici ton bilan`;
+  $('#rMeta').innerHTML = `<b>${state.classe}</b><br>${state.moment}<br>${todayFr()}`;
+
+  // message élève (forces d'abord)
+  buildStudentMessage();
+  // synthèse PP
+  buildPP(prior);
+
+  // enregistrement automatique : un seul relevé par moment (on écrase si le moment existe déjà)
+  const rec = {moment:state.moment, date:todayFr(), scores:{...state.scores}, comment:state.comment, classe:state.classe, firstname:state.firstname};
+  const exist = history.findIndex(r=>r.moment===state.moment);
+  if(exist>=0) history[exist]=rec; else history.push(rec);
+  saveHistory(history);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function buildStudentMessage(){
+  const sorted=[...ITEMS].sort((a,b)=>(state.scores[b.id]||0)-(state.scores[a.id]||0));
+  const top=sorted.slice(0,2).map(i=>i.short.replace('\n',' ').replace('*','').toLowerCase());
+  const low=sorted.filter(i=>(state.scores[i.id]||0)<=4);
+  let html=`<b>Bravo d'avoir fait ce point. 🙌</b> Tes points forts du moment : <b>${top.join('</b> et <b>')}</b>. `;
+  if(low.length===0){
+    html+=`L'ensemble est plutôt solide — continue comme ça, et n'oublie pas qu'on peut toujours demander un coup de main quand on en a besoin.`;
+  }else{
+    html+=`Quelques aspects sont plus fragiles en ce moment, et c'est complètement normal : une année se construit petit à petit. <b>Si quelque chose te pèse, parles-en</b> à ton professeur principal, à un adulte de confiance, à l'infirmerie ou à la vie scolaire — tu n'as pas à gérer ça tout·e seul·e.`;
+  }
+  $('#studentMsg').innerHTML=html;
+}
+
+function buildPP(prior){
+  // barres par sphère
+  let bars='';
+  Object.keys(SPHERES).forEach(k=>{
+    const av=avgSphere(k,state.scores);
+    const pct=(av/10*100).toFixed(0);
+    const color=SPHERES[k].color;
+    bars+=`<div class="sb">
+      <span class="nm"><i style="background:${color}"></i>${SPHERES[k].name.replace('Sphère ','')}</span>
+      <span class="track"><span class="fill" style="width:${pct}%;background:${color}"></span></span>
+      <span class="val">${av.toFixed(1)}</span></div>`;
+  });
+  $('#sphereBars').innerHTML=bars;
+
+  const flags=[];
+
+  // 1. items critiques / vigilance
+  const alerts=ITEMS.filter(i=>state.scores[i.id]<=2);
+  const warns=ITEMS.filter(i=>state.scores[i.id]>2 && state.scores[i.id]<=4);
+
+  // 2. indice mal-être / confiance (items socio-affectifs clés)
+  const wellKeys=[10,9,8,7,5,0]; // acceptation, relation pairs, relation prof, recherche d'aide, sérénité, motivation
+  const wellLow=wellKeys.filter(id=>state.scores[id]<=4).length;
+
+  if(alerts.length || wellLow>=3){
+    let names=alerts.map(i=>i.short.replace('\n',' ').replace('*','')).join(', ');
+    flags.push({lv:'alert', html:`<b>Vigilance prioritaire.</b> Score très bas sur : ${names||'plusieurs dimensions socio-affectives'}. ${wellLow>=3?'Plusieurs signaux liés au bien-être et à la confiance sont au rouge — à aborder rapidement et en confiance.':'À explorer en entretien individuel sans tarder.'}`});
+  }
+  if(warns.length){
+    let names=warns.map(i=>`${i.short.replace('\n',' ').replace('*','')} (${state.scores[i.id]})`).join(' · ');
+    flags.push({lv:'warn', html:`<b>Points d'attention.</b> ${names}.`});
+  }
+
+  // 3. comparaison temporelle (baisse de confiance)
+  if(prior.length){
+    const ref=prior[0]; // relevé le plus ancien disponible
+    const drops=ITEMS.filter(i=>typeof ref.scores[i.id]==='number' && (state.scores[i.id]-ref.scores[i.id])<=-2)
+      .map(i=>`${i.short.replace('\n',' ').replace('*','')} (${ref.scores[i.id]}→${state.scores[i.id]})`);
+    const refAvg=ITEMS.reduce((a,i)=>a+(ref.scores[i.id]||0),0)/ITEMS.length;
+    const curAvg=ITEMS.reduce((a,i)=>a+(state.scores[i.id]||0),0)/ITEMS.length;
+    if(drops.length){
+      flags.push({lv:'alert', html:`<b>Baisse depuis « ${ref.moment} ».</b> Recul de 2 points ou plus sur : ${drops.join(' · ')}. Une dégradation dans le temps mérite une attention particulière.`});
+    }else if(curAvg-refAvg>=0.8){
+      flags.push({lv:'ok', html:`<b>Évolution positive.</b> Le ressenti global progresse depuis « ${ref.moment} » (${refAvg.toFixed(1)} → ${curAvg.toFixed(1)}).`});
+    }
+  }
+
+  if(!alerts.length && !warns.length && wellLow<3){
+    flags.push({lv:'ok', html:`<b>Aucun signal d'alerte.</b> Le positionnement de l'élève est globalement favorable sur les trois sphères.`});
+  }
+
+  let html='<div class="flags">';
+  flags.forEach(f=>{ html+=`<div class="flag lv-${f.lv}"><span class="b"></span><div>${f.html}</div></div>`; });
+  html+='</div>';
+
+  if(state.comment){
+    html+=`<div class="subh">Mot de l'élève</div><div class="commentbox">« ${state.comment.replace(/</g,'&lt;')} »</div>`;
+  }
+  $('#ppContent').innerHTML=html;
+}
+
+/* ====================== ACTIONS RAPPORT ====================== */
+$('#pdfBtn').addEventListener('click',()=>window.print());
+
+$('#restartBtn').addEventListener('click',()=>{
+  $('#screen-report').classList.add('hidden');
+  $('#screen-welcome').classList.remove('hidden');
+  fn.value=''; cl.value=''; mo.selectedIndex=0; checkStart();
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+</script>
+</body>
+</html>
