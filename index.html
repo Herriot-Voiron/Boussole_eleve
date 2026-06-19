@@ -113,7 +113,7 @@ input:focus,select:focus{outline:none;border-color:var(--primary);background:#ff
 @media(max-width:560px){.qstep{padding:18px}}
 .qnum{font-family:var(--font-display);font-weight:800;font-size:13px;color:var(--ink-soft);letter-spacing:.06em}
 .qtext{font-family:var(--font-display);font-weight:700;font-size:clamp(21px,4.4vw,28px);line-height:1.18;letter-spacing:-.015em;margin:8px 0 26px}
-.scale{display:grid;grid-template-columns:repeat(10,1fr);gap:8px}
+.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
 @media(max-width:560px){.scale{grid-template-columns:repeat(5,1fr)}}
 .dot{aspect-ratio:1/1;border:1.5px solid var(--line);background:#fbfaff;border-radius:13px;
   font-family:var(--font-display);font-weight:700;font-size:17px;color:var(--ink-soft);cursor:pointer;transition:.13s;display:grid;place-items:center}
@@ -308,7 +308,7 @@ textarea:focus{outline:none;border-color:var(--primary);background:#fff;box-shad
 // Ordre de TRACÉ autour du cercle (sens horaire depuis le haut), pour coller à la grille d'origine.
 const ITEMS = [
   {id:0,  sphere:'acad', short:'Motivation',            q:"J'ai envie de venir en cours et d'apprendre de nouvelles choses."},
-  {id:1,  sphere:'acad', short:'Acquis',                q:"Je comprends ce qu'on étudie et j'ai l'impression de progresser."},
+  {id:1,  sphere:'acad', short:'Niveau\nscolaire',                q:"Je comprends ce qu'on étudie et j'ai l'impression de progresser."},
   {id:2,  sphere:'acad', short:'Résolution\nde problème',q:"Quand un exercice est difficile, j'arrive à chercher des solutions par moi-même."},
   {id:3,  sphere:'comp', short:'Calme\nen classe',      q:"En classe, je me sens calme et posé·e, sans avoir besoin de bouger ou de m'agiter."},
   {id:4,  sphere:'comp', short:'Participation\norale',  q:"Je participe à l'oral et je prends la parole en classe."},
@@ -387,14 +387,14 @@ function renderStep(){
 
   const current = state.scores[id];
   let dots='';
-  for(let v=1;v<=10;v++){
+  for(let v=1;v<=5;v++){
     dots+=`<button class="dot${current===v?' sel':''}" data-v="${v}">${v}</button>`;
   }
   qstep.innerHTML = `
     <div class="qnum">${sph.name.toUpperCase()}</div>
     <div class="qtext">${item.q.replace('\n',' ')}</div>
     <div class="scale">${dots}</div>
-    <div class="scale-ends"><span>1 · Pas du tout</span><span>Tout à fait · 10</span></div>
+    <div class="scale-ends"><span>1 · Pas du tout</span><span>Tout à fait · 5</span></div>
     <div class="qnav">
       <button class="linklike" id="prevBtn"${state.step===0?' disabled':''}>← Précédent</button>
       <button class="linklike" id="skipBtn">${current?'Suivant →':''}</button>
@@ -439,18 +439,19 @@ function wrapLabel(txt){ return txt.split('\n'); }
 
 function buildRadar(series){
   // series : tableau d'objets {label, color, dash, scores}
-  const W=660,H=660,cx=330,cy=330,R=200,maxR=10,labelR=R+24;
+  const W=660,H=660,cx=330,cy=330,R=200,maxR=5,labelR=R+24;
   const N=ITEMS.length, stepA=360/N;
+  const AXORD=[12,13,14,2,5,3,6,4,7,10,9,8,0,1,11].map(id=>ITEMS[id]);
   let svg=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagramme radar des ressentis">`;
 
   // 1. wedges de fond par sphère (un secteur de 24° par axe)
-  ITEMS.forEach((it,i)=>{
+  AXORD.forEach((it,i)=>{
     const a0=i*stepA-stepA/2, a1=i*stepA+stepA/2;
     const [x0,y0]=polar(cx,cy,R,a0), [x1,y1]=polar(cx,cy,R,a1);
     svg+=`<path d="M${cx} ${cy} L${x0.toFixed(1)} ${y0.toFixed(1)} A${R} ${R} 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)} Z" fill="${SPHERES[it.sphere].color}" fill-opacity="0.13"/>`;
   });
   // bande extérieure saturée (identité visuelle)
-  ITEMS.forEach((it,i)=>{
+  AXORD.forEach((it,i)=>{
     const a0=i*stepA-stepA/2, a1=i*stepA+stepA/2;
     const rIn=R-9;
     const [x0,y0]=polar(cx,cy,R,a0),[x1,y1]=polar(cx,cy,R,a1);
@@ -458,29 +459,29 @@ function buildRadar(series){
     svg+=`<path d="M${x0.toFixed(1)} ${y0.toFixed(1)} A${R} ${R} 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)} L${xi0.toFixed(1)} ${yi0.toFixed(1)} A${rIn} ${rIn} 0 0 0 ${xi1.toFixed(1)} ${yi1.toFixed(1)} Z" fill="${SPHERES[it.sphere].color}" fill-opacity="0.85"/>`;
   });
 
-  // 2. anneaux de grille (2,4,6,8,10)
-  for(let g=2; g<=maxR; g+=2){
+  // 2. anneaux de grille (1..5)
+  for(let g=1; g<maxR; g++){
     const rr=R*g/maxR;
-    svg+=`<circle cx="${cx}" cy="${cy}" r="${rr.toFixed(1)}" fill="none" stroke="#ffffff" stroke-width="1.4"/>`;
+    svg+=`<circle cx="${cx}" cy="${cy}" r="${rr.toFixed(1)}" fill="none" stroke="#ffffff" stroke-width="1.2"/>`;
   }
   svg+=`<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#ffffff" stroke-width="2"/>`;
 
   // 3. axes
-  ITEMS.forEach((it,i)=>{
+  AXORD.forEach((it,i)=>{
     const [x,y]=polar(cx,cy,R,i*stepA);
     svg+=`<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#ffffff" stroke-width="1.4"/>`;
   });
 
   // 4. polygones de données (du plus ancien au plus récent)
   series.forEach(s=>{
-    let pts=ITEMS.map((it,i)=>{ const v=Math.max(0,Math.min(10,s.scores[it.id]||0)); const r=R*v/maxR; return polar(cx,cy,r,i*stepA).map(n=>n.toFixed(1)).join(','); }).join(' ');
+    let pts=AXORD.map((it,i)=>{ const v=Math.max(0,Math.min(10,s.scores[it.id]||0)); const r=R*v/maxR; return polar(cx,cy,r,i*stepA).map(n=>n.toFixed(1)).join(','); }).join(' ');
     const dash = s.dash? ` stroke-dasharray="${s.dash}"`:'';
     svg+=`<polygon points="${pts}" fill="${s.color}" fill-opacity="${s.fillOp}" stroke="${s.color}" stroke-width="${s.w}"${dash} stroke-linejoin="round"/>`;
   });
   // points (sur la dernière série = la plus récente)
   const last=series[series.length-1];
   const single = series.length===1;
-  ITEMS.forEach((it,i)=>{
+  AXORD.forEach((it,i)=>{
     const v=Math.max(0,Math.min(10,last.scores[it.id]||0)); const r=R*v/maxR;
     const [x,y]=polar(cx,cy,r,i*stepA);
     const fill = single ? SPHERES[it.sphere].color : last.color;
@@ -488,7 +489,7 @@ function buildRadar(series){
   });
 
   // 5. étiquettes
-  ITEMS.forEach((it,i)=>{
+  AXORD.forEach((it,i)=>{
     const ang=i*stepA; const [lx,ly]=polar(cx,cy,labelR,ang);
     const a=(ang-90)*Math.PI/180; const cos=Math.cos(a);
     let anchor = cos>0.15?'start':(cos<-0.15?'end':'middle');
@@ -500,7 +501,7 @@ function buildRadar(series){
   });
 
   // valeurs de l'échelle
-  for(let g=2; g<=maxR; g+=2){ const rr=R*g/maxR; svg+=`<text x="${cx+4}" y="${(cy-rr+4).toFixed(1)}" font-family="Inter,sans-serif" font-size="11" fill="#9a96ad" font-weight="600">${g}</text>`; }
+  for(let g=1; g<=maxR; g++){ const rr=R*g/maxR; svg+=`<text x="${cx+4}" y="${(cy-rr+4).toFixed(1)}" font-family="Inter,sans-serif" font-size="11" fill="#9a96ad" font-weight="600">${g}</text>`; }
 
   svg+=`</svg>`;
   return svg;
@@ -577,7 +578,7 @@ function showReport(){
 function buildStudentMessage(){
   const sorted=[...ITEMS].sort((a,b)=>(state.scores[b.id]||0)-(state.scores[a.id]||0));
   const top=sorted.slice(0,3).map(i=>i.short.replace('\n',' ').toLowerCase());
-  const low=sorted.filter(i=>(state.scores[i.id]||0)<=4);
+  const low=sorted.filter(i=>(state.scores[i.id]||0)<=2);
   let html=`<b>Bravo d'avoir pris ce temps pour faire le point.</b> Ce que tu mets en avant aujourd'hui, ce sont tes appuis : <b>${top.join('</b>, <b>')}</b>. Ce sont des forces sur lesquelles tu peux compter. `;
   if(low.length===0){
     html+=`Ton équilibre paraît solide sur l'ensemble des dimensions — continue sur ta lancée, et garde en tête qu'on peut toujours demander un coup de main quand on en a besoin.`;
