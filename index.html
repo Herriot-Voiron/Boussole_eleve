@@ -149,6 +149,13 @@ textarea:focus{outline:none;border-color:var(--primary);background:#fff;box-shad
 
 .note{font-size:12px;color:var(--ink-soft);text-align:center;margin-top:2px}
 
+/* ligne d'identification dans le PDF (visible à l'impression) */
+.pdf-id{display:none}
+@media print{
+  .pdf-id{display:block;font-family:var(--font-body);font-size:11px;font-weight:700;color:#56468a;
+    letter-spacing:.05em;text-transform:uppercase;margin-bottom:12px;border-bottom:2px solid #56468a;padding-bottom:7px}
+}
+
 /* code de synthèse (lisible par le tableau de bord PP) */
 .payload{margin-top:20px;border-top:1px dashed var(--line);padding-top:12px;
   font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;line-height:1.45;color:#a7a2b8;word-break:break-all}
@@ -266,6 +273,7 @@ textarea:focus{outline:none;border-color:var(--primary);background:#fff;box-shad
   <!-- ÉCRAN 3 : RAPPORT -->
   <section class="card hidden" id="screen-report">
     <div class="pad" id="report">
+      <div class="pdf-id" id="pdfId"></div>
       <div class="report-head">
         <div>
           <span class="eyebrow">Ma boussole</span>
@@ -278,17 +286,6 @@ textarea:focus{outline:none;border-color:var(--primary);background:#fff;box-shad
       <div class="legend" id="legend"></div>
 
       <div class="msg warm" id="studentMsg"></div>
-
-      <div class="pp">
-        <div class="pp-head"><span class="tag">Synthèse</span> Pour le professeur principal</div>
-        <div class="pp-body">
-          <div class="sphere-bars" id="sphereBars"></div>
-          <div id="ppContent"></div>
-          <div class="disclaimer">
-            Cet outil recueille un <b>ressenti déclaratif</b> à un instant donné : c'est une porte d'entrée pour le dialogue, jamais un diagnostic. Un ou plusieurs scores bas invitent à <b>ouvrir la conversation avec bienveillance</b>, sans dramatiser. En cas de signes de mal-être, ne reste pas seul·e : appuie-toi sur le CPE, l'infirmier·ère, le ou la psychologue de l'Éducation nationale et, si besoin, le médecin scolaire.
-          </div>
-        </div>
-      </div>
 
       <div class="payload" id="payloadBlock">
         <b>Code de synthèse — ne pas modifier.</b><br>
@@ -554,10 +551,13 @@ function showReport(){
   $('#rTitle').textContent = `${state.firstname}, voici ton bilan`;
   $('#rMeta').innerHTML = `<b>${state.classe}</b><br>${state.moment}<br>${todayFr()}`;
 
-  // message élève (forces d'abord)
+  // identification dans le PDF + nom du fichier (pour que le PP s'y retrouve)
+  $('#pdfId').textContent = `Boussole · ${state.firstname} · ${state.classe} · ${state.moment} · ${todayFr()}`;
+  document.title = `Boussole - ${state.firstname} - ${state.classe} - ${state.moment}`
+                     .replace(/[\\/:*?"<>|]+/g,'-').replace(/\s+/g,' ').trim();
+
+  // message élève — bienveillant et encourageant
   buildStudentMessage();
-  // synthèse PP
-  buildPP(prior);
 
   // code de synthèse exploitable par le tableau de bord PP (texte conservé dans le PDF)
   const payload = {v:1, n:state.firstname, c:state.classe, m:state.moment, d:todayFr(),
@@ -576,82 +576,23 @@ function showReport(){
 
 function buildStudentMessage(){
   const sorted=[...ITEMS].sort((a,b)=>(state.scores[b.id]||0)-(state.scores[a.id]||0));
-  const top=sorted.slice(0,2).map(i=>i.short.replace('\n',' ').replace('*','').toLowerCase());
+  const top=sorted.slice(0,3).map(i=>i.short.replace('\n',' ').toLowerCase());
   const low=sorted.filter(i=>(state.scores[i.id]||0)<=4);
-  let html=`<b>Bravo d'avoir fait ce point. 🙌</b> Tes points forts du moment : <b>${top.join('</b> et <b>')}</b>. `;
+  let html=`<b>Bravo d'avoir pris ce temps pour faire le point.</b> Ce que tu mets en avant aujourd'hui, ce sont tes appuis : <b>${top.join('</b>, <b>')}</b>. Ce sont des forces sur lesquelles tu peux compter. `;
   if(low.length===0){
-    html+=`L'ensemble est plutôt solide — continue comme ça, et n'oublie pas qu'on peut toujours demander un coup de main quand on en a besoin.`;
+    html+=`Ton équilibre paraît solide sur l'ensemble des dimensions — continue sur ta lancée, et garde en tête qu'on peut toujours demander un coup de main quand on en a besoin.`;
   }else{
-    html+=`Quelques aspects sont plus fragiles en ce moment, et c'est complètement normal : une année se construit petit à petit. <b>Si quelque chose te pèse, parles-en</b> à ton professeur principal, à un adulte de confiance, à l'infirmerie ou à la vie scolaire — tu n'as pas à gérer ça tout·e seul·e.`;
+    html+=`Sur d'autres aspects, tu te sens un peu moins à l'aise en ce moment : c'est normal, une année se construit pas à pas, et rien n'est figé. Si tu en ressens l'envie ou le besoin, tu peux en parler à ton professeur principal, à un adulte de confiance, à l'infirmerie ou à la vie scolaire. Tu n'as pas à avancer seul·e.`;
   }
+  html+=` Refais ce point plus tard dans l'année : tu verras le chemin parcouru.`;
   $('#studentMsg').innerHTML=html;
-}
-
-function buildPP(prior){
-  // barres par sphère
-  let bars='';
-  Object.keys(SPHERES).forEach(k=>{
-    const av=avgSphere(k,state.scores);
-    const pct=(av/10*100).toFixed(0);
-    const color=SPHERES[k].color;
-    bars+=`<div class="sb">
-      <span class="nm"><i style="background:${color}"></i>${SPHERES[k].name.replace('Sphère ','')}</span>
-      <span class="track"><span class="fill" style="width:${pct}%;background:${color}"></span></span>
-      <span class="val">${av.toFixed(1)}</span></div>`;
-  });
-  $('#sphereBars').innerHTML=bars;
-
-  const flags=[];
-
-  // 1. items critiques / vigilance
-  const alerts=ITEMS.filter(i=>state.scores[i.id]<=2);
-  const warns=ITEMS.filter(i=>state.scores[i.id]>2 && state.scores[i.id]<=4);
-
-  // 2. indice mal-être / confiance (items socio-affectifs clés)
-  const wellKeys=[10,9,8,7,5,0]; // acceptation, relation pairs, relation prof, recherche d'aide, sérénité, motivation
-  const wellLow=wellKeys.filter(id=>state.scores[id]<=4).length;
-
-  if(alerts.length || wellLow>=3){
-    let names=alerts.map(i=>i.short.replace('\n',' ').replace('*','')).join(', ');
-    flags.push({lv:'alert', html:`<b>Vigilance prioritaire.</b> Score très bas sur : ${names||'plusieurs dimensions socio-affectives'}. ${wellLow>=3?'Plusieurs signaux liés au bien-être et à la confiance sont au rouge — à aborder rapidement et en confiance.':'À explorer en entretien individuel sans tarder.'}`});
-  }
-  if(warns.length){
-    let names=warns.map(i=>`${i.short.replace('\n',' ').replace('*','')} (${state.scores[i.id]})`).join(' · ');
-    flags.push({lv:'warn', html:`<b>Points d'attention.</b> ${names}.`});
-  }
-
-  // 3. comparaison temporelle (baisse de confiance)
-  if(prior.length){
-    const ref=prior[0]; // relevé le plus ancien disponible
-    const drops=ITEMS.filter(i=>typeof ref.scores[i.id]==='number' && (state.scores[i.id]-ref.scores[i.id])<=-2)
-      .map(i=>`${i.short.replace('\n',' ').replace('*','')} (${ref.scores[i.id]}→${state.scores[i.id]})`);
-    const refAvg=ITEMS.reduce((a,i)=>a+(ref.scores[i.id]||0),0)/ITEMS.length;
-    const curAvg=ITEMS.reduce((a,i)=>a+(state.scores[i.id]||0),0)/ITEMS.length;
-    if(drops.length){
-      flags.push({lv:'alert', html:`<b>Baisse depuis « ${ref.moment} ».</b> Recul de 2 points ou plus sur : ${drops.join(' · ')}. Une dégradation dans le temps mérite une attention particulière.`});
-    }else if(curAvg-refAvg>=0.8){
-      flags.push({lv:'ok', html:`<b>Évolution positive.</b> Le ressenti global progresse depuis « ${ref.moment} » (${refAvg.toFixed(1)} → ${curAvg.toFixed(1)}).`});
-    }
-  }
-
-  if(!alerts.length && !warns.length && wellLow<3){
-    flags.push({lv:'ok', html:`<b>Aucun signal d'alerte.</b> Le positionnement de l'élève est globalement favorable sur les trois sphères.`});
-  }
-
-  let html='<div class="flags">';
-  flags.forEach(f=>{ html+=`<div class="flag lv-${f.lv}"><span class="b"></span><div>${f.html}</div></div>`; });
-  html+='</div>';
-
-  if(state.comment){
-    html+=`<div class="subh">Mot de l'élève</div><div class="commentbox">« ${state.comment.replace(/</g,'&lt;')} »</div>`;
-  }
-  $('#ppContent').innerHTML=html;
 }
 
 /* ====================== ACTIONS RAPPORT ====================== */
 $('#pdfBtn').addEventListener('click',()=>window.print());
 
 $('#restartBtn').addEventListener('click',()=>{
+  document.title='Ma Boussole — Seconde';
   $('#screen-report').classList.add('hidden');
   $('#screen-welcome').classList.remove('hidden');
   fn.value=''; cl.value=''; mo.selectedIndex=0; checkStart();
